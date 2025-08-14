@@ -1,0 +1,2 @@
+"use strict";(self["webpackChunkqinglan_share_website"]=self["webpackChunkqinglan_share_website"]||[]).push([[633],{6633:function(e,n,a){a.r(n),a.d(n,{default:function(){return l}});var s=a(6768);const t={class:"recommendations"};function r(e,n,a,r,u,c){return(0,s.uX)(),(0,s.CE)("div",t,n[0]||(n[0]=[(0,s.Lk)("h1",null,"推荐",-1),(0,s.Lk)("p",null,"推荐页面正在开发中...",-1)]))}var u={name:"RecommendationsPage"},c=a(1241);const i=(0,c.A)(u,[["render",r],["__scopeId","data-v-d6083ebe"]]);var l=i}}]);
+//# sourceMappingURL=633.feab1170.js.map
