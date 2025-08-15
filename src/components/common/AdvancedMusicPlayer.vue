@@ -1,15 +1,26 @@
 <template>
   <div class="advanced-music-player" :class="{ minimized: isMinimized }">
     <!-- 欢迎提示 -->
-    <div v-if="showWelcomePrompt" class="welcome-prompt" @click="handleWelcomeClick">
-      <div class="welcome-content">
+    <div v-if="showWelcomePrompt" class="welcome-prompt" @click="handleWelcomeBackgroundClick">
+      <div class="welcome-content" @click.stop>
         <div class="welcome-icon">🎵</div>
         <h3>“锦水汤汤，与君长绝。” </h3>
-        <p>点击开始聆听《诀别书》，感受古韵悠长</p>
-        <el-button type="primary" @click="handleWelcomeClick" class="welcome-btn">
-          <el-icon><VideoPlay /></el-icon>
-          开始播放
-        </el-button>
+        <p>选择你的浏览方式</p>
+        <div class="welcome-options">
+          <el-button type="primary" @click="handleMusicMode" class="welcome-btn music-btn">
+            <el-icon><VideoPlay /></el-icon>
+            聆听音乐
+            <span class="btn-subtitle">开启《诀别书》，感受古韵悠长</span>
+          </el-button>
+          <el-button @click="handleSilentMode" class="welcome-btn silent-btn">
+            <el-icon><Mute /></el-icon>
+            静音浏览
+            <span class="btn-subtitle">安静地探索网站内容</span>
+          </el-button>
+        </div>
+        <div class="welcome-note">
+          <p>💡 你可以随时在右下角控制音乐播放</p>
+        </div>
       </div>
     </div>
     <!-- 最小化时的简单控制条 -->
@@ -101,9 +112,9 @@
           </div>
           <!-- 控制按钮 -->
           <div class="control">
-            <el-icon @click.stop="toggleRandomMode" class="control-btn random-btn" :class="{ active: isRandomMode }">
+            <!-- <el-icon @click.stop="toggleRandomMode" class="control-btn random-btn" :class="{ active: isRandomMode }">
               <span class="random-icon">🔀</span>
-            </el-icon>
+            </el-icon> -->
             <el-icon @click.stop="prevSong" class="control-btn">
               <DArrowLeft />
             </el-icon>
@@ -139,7 +150,7 @@
 </template>
 
 <script>
-import { VideoPlay, VideoPause, DArrowLeft, DArrowRight, List, Close } from '@element-plus/icons-vue'
+import { VideoPlay, VideoPause, DArrowLeft, DArrowRight, List, Close, Mute } from '@element-plus/icons-vue'
 
 export default {
   name: 'AdvancedMusicPlayer',
@@ -149,7 +160,8 @@ export default {
     DArrowLeft,
     DArrowRight,
     List,
-    Close
+    Close,
+    Mute
   },
   data() {
     return {
@@ -298,41 +310,47 @@ export default {
     }
   },
   mounted() {
-    // 从本地存储恢复状态，但首次访问时强制播放诀别书
+    // 从本地存储恢复状态
     const savedIndex = localStorage.getItem('currentSongIndex')
     const savedPlaylist = localStorage.getItem('selectedPlaylist')
     const savedTab = localStorage.getItem('activeTab')
     const hasInteracted = localStorage.getItem('musicPlayerInteracted')
-    const isFirstVisit = localStorage.getItem('isFirstVisit')
+    const userPreference = localStorage.getItem('userPreference')
 
-    // 如果是首次访问，设置为播放诀别书（索引0）
-    if (isFirstVisit !== 'false') {
-      this.currentIndex = 0 // 诀别书在第一位
-      this.isFirstPlay = false
-      localStorage.setItem('isFirstVisit', 'false')
-      console.log('🎵 首次访问，将播放诀别书')
-    } else if (savedIndex) {
+    // 检查用户是否之前有过选择
+    if (hasInteracted && hasInteracted !== 'false') {
+      this.showWelcomePrompt = false
+
+      if (hasInteracted === 'true' || userPreference === 'music') {
+        this.hasUserInteracted = true
+        console.log('🎵 恢复音乐模式')
+      } else if (hasInteracted === 'silent' || userPreference === 'silent') {
+        this.hasUserInteracted = false
+        this.isMinimized = true
+        console.log('🔇 恢复静音模式')
+      }
+    } else {
+      // 首次访问，显示欢迎页面
+      this.showWelcomePrompt = true
+      this.hasUserInteracted = false
+      console.log('👋 首次访问，显示欢迎页面')
+    }
+
+    // 恢复播放状态
+    if (savedIndex) {
       this.currentIndex = parseInt(savedIndex)
-      this.isFirstPlay = false
       console.log(`🎵 恢复上次播放: ${this.musicList[this.currentIndex]?.name}`)
+    } else {
+      this.currentIndex = 0 // 默认诀别书
     }
 
     if (savedPlaylist) this.selectedPlaylist = savedPlaylist
     if (savedTab) this.activeTab = savedTab
-    if (hasInteracted === 'true') {
-      this.showWelcomePrompt = false
-      this.hasUserInteracted = true
-    }
 
     this.loadCurrentSong()
 
-    // 添加用户交互监听器来自动播放
+    // 添加用户交互监听器
     this.addAutoPlayListener()
-
-    // 如果用户已经交互过，直接开始自动播放
-    if (hasInteracted === 'true') {
-      this.startAutoPlay()
-    }
   },
   methods: {
     toggleMinimize() {
@@ -488,16 +506,55 @@ export default {
       const seconds = Math.floor(time % 60)
       return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
     },
-    handleWelcomeClick() {
+    // 处理音乐模式选择
+    handleMusicMode() {
       this.showWelcomePrompt = false
       this.hasUserInteracted = true
       localStorage.setItem('musicPlayerInteracted', 'true')
+      localStorage.setItem('userPreference', 'music')
+      console.log('🎵 用户选择音乐模式')
+
       // 自动开始播放第一首歌（诀别书）
       this.startAutoPlay()
+    },
+
+    // 处理静音模式选择
+    handleSilentMode() {
+      this.showWelcomePrompt = false
+      this.hasUserInteracted = false // 保持为false，不启用自动播放
+      this.isPlaying = false
+      localStorage.setItem('musicPlayerInteracted', 'silent')
+      localStorage.setItem('userPreference', 'silent')
+      console.log('🔇 用户选择静音模式')
+
+      // 最小化播放器
+      this.isMinimized = true
+    },
+
+    // 处理欢迎页面背景点击 - 进入静音模式
+    handleWelcomeBackgroundClick() {
+      console.log('🔇 点击欢迎页面背景，进入静音模式')
+      this.handleSilentMode()
+    },
+
+    // 兼容旧的方法名（如果其他地方还在使用）
+    handleWelcomeClick() {
+      this.handleMusicMode()
     },
     addAutoPlayListener() {
       // 监听用户的第一次交互
       const startAutoPlay = () => {
+        // 检查用户偏好，如果是静音模式则不自动播放
+        const userPreference = localStorage.getItem('userPreference')
+        if (userPreference === 'silent') {
+          console.log('🔇 用户选择了静音模式，跳过自动播放监听器')
+          // 移除监听器
+          document.removeEventListener('click', startAutoPlay)
+          document.removeEventListener('keydown', startAutoPlay)
+          document.removeEventListener('touchstart', startAutoPlay)
+          return
+        }
+
         if (!this.hasUserInteracted) {
           this.showWelcomePrompt = false
           this.hasUserInteracted = true
@@ -736,6 +793,13 @@ export default {
 
     // 开始自动播放
     startAutoPlay() {
+      // 检查用户偏好，如果是静音模式则不自动播放
+      const userPreference = localStorage.getItem('userPreference')
+      if (userPreference === 'silent') {
+        console.log('🔇 用户选择了静音模式，跳过自动播放')
+        return
+      }
+
       console.log('🎵 开始自动播放')
       this.$nextTick(() => {
         setTimeout(() => {
@@ -762,7 +826,13 @@ export default {
       localStorage.removeItem('isFirstVisit')
       localStorage.removeItem('currentSongIndex')
       localStorage.removeItem('musicPlayerInteracted')
-      console.log('🎵 播放器状态已重置，刷新页面将重新开始')
+      localStorage.removeItem('userPreference')
+      console.log('🎵 播放器状态已重置，刷新页面将显示欢迎页面')
+
+      // 立即重置当前状态
+      this.showWelcomePrompt = true
+      this.hasUserInteracted = false
+      this.isMinimized = true
     }
   }
 }
@@ -818,20 +888,73 @@ export default {
   opacity: 0.9;
 }
 
+.welcome-options {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  width: 100%;
+}
+
 .welcome-btn {
-  font-size: 1.1rem;
-  padding: 12px 24px;
-  border-radius: 25px;
-  background: white;
-  color: #8B4513;
-  border: none;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  padding: 1rem 2rem;
+  font-size: 1rem;
+  border-radius: 15px;
   transition: all 0.3s ease;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 80px;
+  justify-content: center;
+  border: none;
 }
 
 .welcome-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+}
+
+.music-btn {
+  background: linear-gradient(135deg, #4682B4, #87CEEB);
+  color: white;
+}
+
+.music-btn:hover {
+  background: linear-gradient(135deg, #5a9bd4, #a0d8ef);
+}
+
+.silent-btn {
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid #ddd;
+  color: #666;
+}
+
+.silent-btn:hover {
+  background: rgba(248, 249, 250, 1);
+  border-color: #bbb;
+  color: #555;
+}
+
+.btn-subtitle {
+  font-size: 0.8rem;
+  opacity: 0.8;
+  font-weight: normal;
+  line-height: 1.3;
+}
+
+.welcome-note {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.welcome-note p {
+  font-size: 0.85rem;
+  opacity: 0.7;
+  margin: 0;
+  color: #666;
 }
 
 @keyframes fadeIn {

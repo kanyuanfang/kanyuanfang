@@ -1,5 +1,11 @@
 <template>
   <div class="home">
+    <!-- 雪花效果 -->
+    <SnowEffect :enabled="true" :maxFlake="60" :flakeSize="3" :fallSpeed="0.2" />
+
+    <!-- 波浪效果 -->
+    <WaveEffect :enabled="true" theme="winter" :opacity="0.3" />
+
     <!-- 轮播图区域 -->
     <section class="hero-section">
       <div class="hero-content">
@@ -100,20 +106,24 @@
 
 <script>
 import Carousel from '../components/common/Carousel.vue'
+import SnowEffect from '@/components/common/SnowEffect.vue'
+import WaveEffect from '@/components/common/WaveEffect.vue'
 
 export default {
   name: 'HomePage',
   components: {
-    Carousel
+    Carousel,
+    SnowEffect,
+    WaveEffect
   },
   data() {
     return {
-      // 数据将在后续添加
+      // 页面数据
     }
   },
   mounted() {
-    // 加载下雪花效果
-    this.loadSnowEffect()
+    // 获取热点话题
+    this.fetchHotList()
   },
   methods: {
     goToRecommendations(category) {
@@ -122,100 +132,20 @@ export default {
         query: { category }
       })
     },
-    // 加载下雪花效果
-    loadSnowEffect() {
-      // 检查是否已经加载过雪花脚本
-      if (document.getElementById('snow-script')) {
-        return
-      }
 
-      const script = document.createElement('script')
-      script.id = 'snow-script'
-      script.src = 'https://api.vvhan.com/api/script/snow'
-      script.async = true
 
-      script.onload = () => {
-        console.log('雪花效果加载成功')
-      }
 
-      script.onerror = () => {
-        console.error('雪花效果加载失败，使用本地雪花效果')
-        this.createLocalSnowEffect()
-      }
 
-      document.head.appendChild(script)
-    },
-    // 本地雪花效果作为备用方案
-    createLocalSnowEffect() {
-      const snowContainer = document.createElement('div')
-      snowContainer.id = 'local-snow-container'
-      snowContainer.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        pointer-events: none;
-        z-index: 1000;
-        overflow: hidden;
-      `
 
-      document.body.appendChild(snowContainer)
 
-      // 创建雪花
-      for (let i = 0; i < 50; i++) {
-        setTimeout(() => {
-          this.createSnowflake(snowContainer)
-        }, i * 100)
-      }
-
-      // 持续创建新雪花
-      setInterval(() => {
-        if (Math.random() < 0.3) {
-          this.createSnowflake(snowContainer)
-        }
-      }, 300)
-    },
-    // 创建单个雪花
-    createSnowflake(container) {
-      const snowflake = document.createElement('div')
-      const size = Math.random() * 5 + 2
-      const left = Math.random() * 100
-      const animationDuration = Math.random() * 3 + 2
-      const opacity = Math.random() * 0.6 + 0.4
-
-      snowflake.innerHTML = '❄'
-      snowflake.style.cssText = `
-        position: absolute;
-        top: -10px;
-        left: ${left}%;
-        font-size: ${size}px;
-        color: rgba(255, 255, 255, ${opacity});
-        animation: snowfall ${animationDuration}s linear infinite;
-        pointer-events: none;
-      `
-
-      container.appendChild(snowflake)
-
-      // 雪花落下后移除
-      setTimeout(() => {
-        if (snowflake.parentNode) {
-          snowflake.parentNode.removeChild(snowflake)
-        }
-      }, animationDuration * 1000)
+    // 获取热点话题
+    async fetchHotList() {
+      console.log('获取热点话题功能暂未实现')
+      // 这里可以添加热点话题的获取逻辑
     }
   },
   beforeUnmount() {
-    // 清理雪花效果
-    const snowScript = document.getElementById('snow-script')
-    if (snowScript) {
-      snowScript.remove()
-    }
-
-    const localSnowContainer = document.getElementById('local-snow-container')
-    if (localSnowContainer) {
-      localSnowContainer.remove()
-    }
+    // 组件清理
   }
 }
 </script>
@@ -457,29 +387,7 @@ export default {
   color: #6c757d;
 }
 
-/* 雪花动画 */
-@keyframes snowfall {
-  0% {
-    transform: translateY(-10px) translateX(0px) rotate(0deg);
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(100vh) translateX(100px) rotate(360deg);
-    opacity: 0;
-  }
-}
 
-/* 本地雪花容器样式 */
-#local-snow-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 1000;
-  overflow: hidden;
-}
 
 @media (max-width: 768px) {
   .hero-section {
