@@ -1,2 +1,0 @@
-"use strict";(self["webpackChunkqinglan_share_website"]=self["webpackChunkqinglan_share_website"]||[]).push([[953],{8953:function(e,n,s){s.r(n),s.d(n,{default:function(){return i}});var a=s(6768);const r={class:"news"};function t(e,n,s,t,u,c){return(0,a.uX)(),(0,a.CE)("div",r,n[0]||(n[0]=[(0,a.Lk)("h1",null,"资讯",-1),(0,a.Lk)("p",null,"资讯页面正在开发中...",-1)]))}var u={name:"NewsPage"},c=s(1241);const l=(0,c.A)(u,[["render",t],["__scopeId","data-v-5e377c6f"]]);var i=l}}]);
-//# sourceMappingURL=953.7ffe216a.js.map

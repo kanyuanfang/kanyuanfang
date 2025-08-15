@@ -1,2 +1,0 @@
-"use strict";(self["webpackChunkqinglan_share_website"]=self["webpackChunkqinglan_share_website"]||[]).push([[877],{1877:function(e,n,a){a.r(n),a.d(n,{default:function(){return i}});var t=a(6768);const l={class:"blog-detail"};function s(e,n,a,s,r,u){return(0,t.uX)(),(0,t.CE)("div",l,n[0]||(n[0]=[(0,t.Lk)("h1",null,"博客详情",-1),(0,t.Lk)("p",null,"博客详情页面正在开发中...",-1)]))}var r={name:"BlogDetailPage"},u=a(1241);const c=(0,u.A)(r,[["render",s],["__scopeId","data-v-b51c37b6"]]);var i=c}}]);
-//# sourceMappingURL=877.96f27765.js.map

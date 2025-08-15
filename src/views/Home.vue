@@ -3,7 +3,7 @@
     <!-- 轮播图区域 -->
     <section class="hero-section">
       <div class="hero-content">
-        <h2 class="hero-title">欢迎来到青岚</h2>
+        <h2 class="hero-title">“锦水汤汤，与君长绝。”</h2>
         <p class="hero-subtitle">在这里发现美好，分享生活</p>
       </div>
     </section>
@@ -111,16 +111,111 @@ export default {
       // 数据将在后续添加
     }
   },
+  mounted() {
+    // 加载下雪花效果
+    this.loadSnowEffect()
+  },
   methods: {
     goToRecommendations(category) {
       this.$router.push({
         path: '/recommendations',
         query: { category }
       })
+    },
+    // 加载下雪花效果
+    loadSnowEffect() {
+      // 检查是否已经加载过雪花脚本
+      if (document.getElementById('snow-script')) {
+        return
+      }
+
+      const script = document.createElement('script')
+      script.id = 'snow-script'
+      script.src = 'https://api.vvhan.com/api/script/snow'
+      script.async = true
+
+      script.onload = () => {
+        console.log('雪花效果加载成功')
+      }
+
+      script.onerror = () => {
+        console.error('雪花效果加载失败，使用本地雪花效果')
+        this.createLocalSnowEffect()
+      }
+
+      document.head.appendChild(script)
+    },
+    // 本地雪花效果作为备用方案
+    createLocalSnowEffect() {
+      const snowContainer = document.createElement('div')
+      snowContainer.id = 'local-snow-container'
+      snowContainer.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 1000;
+        overflow: hidden;
+      `
+
+      document.body.appendChild(snowContainer)
+
+      // 创建雪花
+      for (let i = 0; i < 50; i++) {
+        setTimeout(() => {
+          this.createSnowflake(snowContainer)
+        }, i * 100)
+      }
+
+      // 持续创建新雪花
+      setInterval(() => {
+        if (Math.random() < 0.3) {
+          this.createSnowflake(snowContainer)
+        }
+      }, 300)
+    },
+    // 创建单个雪花
+    createSnowflake(container) {
+      const snowflake = document.createElement('div')
+      const size = Math.random() * 5 + 2
+      const left = Math.random() * 100
+      const animationDuration = Math.random() * 3 + 2
+      const opacity = Math.random() * 0.6 + 0.4
+
+      snowflake.innerHTML = '❄'
+      snowflake.style.cssText = `
+        position: absolute;
+        top: -10px;
+        left: ${left}%;
+        font-size: ${size}px;
+        color: rgba(255, 255, 255, ${opacity});
+        animation: snowfall ${animationDuration}s linear infinite;
+        pointer-events: none;
+      `
+
+      container.appendChild(snowflake)
+
+      // 雪花落下后移除
+      setTimeout(() => {
+        if (snowflake.parentNode) {
+          snowflake.parentNode.removeChild(snowflake)
+        }
+      }, animationDuration * 1000)
     }
   },
-  mounted() {
-    // 组件挂载后的逻辑
+  beforeUnmount() {
+    // 清理雪花效果
+    const snowScript = document.getElementById('snow-script')
+    if (snowScript) {
+      snowScript.remove()
+    }
+
+    const localSnowContainer = document.getElementById('local-snow-container')
+    if (localSnowContainer) {
+      localSnowContainer.remove()
+    }
   }
 }
 </script>
@@ -360,6 +455,30 @@ export default {
   justify-content: center;
   border-radius: 8px;
   color: #6c757d;
+}
+
+/* 雪花动画 */
+@keyframes snowfall {
+  0% {
+    transform: translateY(-10px) translateX(0px) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) translateX(100px) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+/* 本地雪花容器样式 */
+#local-snow-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1000;
+  overflow: hidden;
 }
 
 @media (max-width: 768px) {

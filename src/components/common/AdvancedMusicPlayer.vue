@@ -4,8 +4,8 @@
     <div v-if="showWelcomePrompt" class="welcome-prompt" @click="handleWelcomeClick">
       <div class="welcome-content">
         <div class="welcome-icon">🎵</div>
-        <h3>欢迎来到青岚音乐</h3>
-        <p>点击开始享受美妙的音乐之旅</p>
+        <h3>“锦水汤汤，与君长绝。” </h3>
+        <p>点击开始聆听《诀别书》，感受古韵悠长</p>
         <el-button type="primary" @click="handleWelcomeClick" class="welcome-btn">
           <el-icon><VideoPlay /></el-icon>
           开始播放
@@ -42,7 +42,7 @@
           <div class="name">{{ currentSong.name }}</div>
           <div class="singer-album">{{ currentSong.singer }} - {{ currentSong.album }}</div>
           <!-- 歌词显示 -->
-          <div class="lyrics-container" v-if="currentSong.lyrics">
+          <div class="lyrics-container" v-if="parsedLyrics.length > 0">
             <div class="current-lyric">{{ currentLyric }}</div>
           </div>
         </div>
@@ -101,6 +101,9 @@
           </div>
           <!-- 控制按钮 -->
           <div class="control">
+            <el-icon @click.stop="toggleRandomMode" class="control-btn random-btn" :class="{ active: isRandomMode }">
+              <span class="random-icon">🔀</span>
+            </el-icon>
             <el-icon @click.stop="prevSong" class="control-btn">
               <DArrowLeft />
             </el-icon>
@@ -162,6 +165,13 @@ export default {
       hasUserInteracted: false,
       currentLyricIndex: 0,
       loadingSongIndex: -1, // 正在加载的歌曲索引
+      // 歌词同步相关
+      parsedLyrics: [], // 解析后的歌词数组
+      currentLyricLine: 0, // 当前歌词行
+      // 随机播放相关
+      isRandomMode: true, // 默认开启随机播放
+      playedSongs: [], // 已播放的歌曲索引记录
+      isFirstPlay: true, // 是否是首次播放
       neteasePlaylists: [
         { id: '514947114', name: '默认歌单' },
         { id: '2884035', name: '华语流行' },
@@ -172,96 +182,67 @@ export default {
       ],
       musicList: [
         {
+          name: "诀别书",
+          audio_url: require("@/assets/music-organized/jue-bie-shu.mp3"),
+          singer: "邓垚",
+          album: "诀别书",
+          cover: require("@/assets/music-organized/jue-bie-shu.jpg"),
+          time: "05:00",
+          lrcFile: "jue-bie-shu.lrc"
+        },
+        {
           name: "我记得",
-          audio_url: "/music-player-demo-master/audios/我记得.mp3",
+          audio_url: require("@/assets/music-organized/wo-ji-de.mp3"),
           singer: "赵雷",
           album: "署前街少年",
-          cover: "http://p2.music.126.net/FCWD6ibS2JK2B3QAnXuzwQ==/109951167805892385.jpg",
+          cover: require("@/assets/music-organized/wo-ji-de.jpg"),
           time: "05:29",
-          lyrics: [
-            { time: 0, text: "♪ 音乐开始 ♪" },
-            { time: 15, text: "那些年的时光" },
-            { time: 30, text: "如今还在心上" },
-            { time: 45, text: "记忆中的模样" },
-            { time: 60, text: "永远不会遗忘" },
-            { time: 75, text: "青春的岁月里" },
-            { time: 90, text: "有你陪伴身旁" },
-            { time: 105, text: "那些美好时光" },
-            { time: 120, text: "我记得..." }
-          ]
+          lrcFile: "wo-ji-de.lrc"
         },
         {
-          name: "成都",
-          audio_url: "/music-player-demo-master/audios/成都.mp3",
+          name: "程艾影",
+          audio_url: require("@/assets/music-organized/cheng-ai-ying.mp3"),
           singer: "赵雷",
-          album: "成都",
-          cover: "http://p2.music.126.net/34YW1QtKxJ_3YnX9ZzKhzw==/2946691234868155.jpg",
-          time: "05:28",
-          lyrics: [
-            { time: 0, text: "♪ 音乐开始 ♪" },
-            { time: 20, text: "让我掉下眼泪的" },
-            { time: 35, text: "不止昨夜的酒" },
-            { time: 50, text: "让我依依不舍的" },
-            { time: 65, text: "不止你的温柔" },
-            { time: 80, text: "余路还要走多久" },
-            { time: 95, text: "你攥着我的手" },
-            { time: 110, text: "让我感到为难的" },
-            { time: 125, text: "是挣扎的自由" }
-          ]
+          album: "程艾影",
+          cover: require("@/assets/music-organized/cheng-ai-ying.jpg"),
+          time: "05:00",
+          lrcFile: "cheng-ai-ying.lrc"
         },
         {
-          name: "南方姑娘",
-          audio_url: "/music-player-demo-master/audios/南方姑娘.mp3",
-          singer: "赵雷",
-          album: "赵小雷",
-          cover: "http://p2.music.126.net/wldFtES1Cjnbqr5bjlqQbg==/18876415625841069.jpg",
-          time: "05:32",
-          lyrics: [
-            { time: 0, text: "♪ 音乐开始 ♪" },
-            { time: 18, text: "南方的艳阳里" },
-            { time: 33, text: "大雪纷飞" },
-            { time: 48, text: "北方的寒夜里" },
-            { time: 63, text: "四季如春" },
-            { time: 78, text: "如果天黑之前来得及" },
-            { time: 93, text: "我要忘了你的眼睛" },
-            { time: 108, text: "穷极一生做不完一场梦" }
-          ]
+          name: "花日（手风琴版）",
+          audio_url: require("@/assets/music-organized/hua-ri.mp3"),
+          singer: "王耳德",
+          album: "花日",
+          cover: require("@/assets/music-organized/hua-ri.jpg"),
+          time: "04:30",
+          lrcFile: "hua-ri.lrc"
         },
         {
-          name: "阴天快乐",
-          audio_url: "/music-player-demo-master/audios/阴天快乐.mp3",
-          singer: "陈奕迅",
-          album: "Rice & Shine",
-          cover: "http://p2.music.126.net/itkdsMFR8nYzaTiDdHO3tA==/109951165995320408.jpg",
-          time: "04:20",
-          lyrics: [
-            { time: 0, text: "♪ 音乐开始 ♪" },
-            { time: 15, text: "阴天快乐" },
-            { time: 30, text: "心情如天气" },
-            { time: 45, text: "时晴时雨" },
-            { time: 60, text: "但总会放晴" },
-            { time: 75, text: "就像这首歌" },
-            { time: 90, text: "带给你温暖" },
-            { time: 105, text: "阴天也快乐" }
-          ]
+          name: "Life Time",
+          audio_url: require("@/assets/music-organized/life-time.mp3"),
+          singer: "William King",
+          album: "Acoustic Guitar",
+          cover: require("@/assets/music-organized/life-time.jpg"),
+          time: "03:30",
+          lrcFile: "life-time.lrc"
         },
         {
-          name: "爱情转移",
-          audio_url: "/music-player-demo-master/audios/爱情转移.mp3",
-          singer: "陈奕迅",
-          album: "认了吧",
-          cover: "http://p2.music.126.net/o_OjL_NZNoeog9fIjBXAyw==/18782957139233959.jpg",
-          time: "04:20",
-          lyrics: [
-            { time: 0, text: "♪ 音乐开始 ♪" },
-            { time: 20, text: "爱情转移" },
-            { time: 35, text: "像季节更替" },
-            { time: 50, text: "时间在流逝" },
-            { time: 65, text: "感情在变迁" },
-            { time: 80, text: "但美好的回忆" },
-            { time: 95, text: "永远不会消失" },
-            { time: 110, text: "在心中闪闪发光" }
-          ]
+          name: "どん",
+          audio_url: require("@/assets/music-organized/don.mp3"),
+          singer: "秋山羊子",
+          album: "どん",
+          cover: require("@/assets/music-organized/don.jpg"),
+          time: "04:00",
+          lrcFile: "don.lrc"
+        },
+        {
+          name: "エイプリル・フロント",
+          audio_url: require("@/assets/music-organized/april-front.mp3"),
+          singer: "松たか子",
+          album: "エイプリル・フロント",
+          cover: require("@/assets/music-organized/april-front.jpg"),
+          time: "04:15",
+          lrcFile: "april-front.lrc"
         }
       ]
     }
@@ -277,31 +258,65 @@ export default {
       return `//music.163.com/outchain/player?type=0&id=${this.selectedPlaylist}&auto=0&height=200`
     },
     currentLyric() {
-      if (!this.currentSong.lyrics || this.currentSong.lyrics.length === 0) {
+      // 如果没有解析到歌词，根据歌曲类型显示不同的默认文本
+      if (!this.parsedLyrics || this.parsedLyrics.length === 0) {
+        const song = this.currentSong
+        // 检查是否是纯音乐
+        if (song.name.includes('纯音乐') || song.name.includes('Instrumental') ||
+            song.name.includes('Life Time') || song.name.includes('花日') ||
+            song.name.includes('诀别书')) {
+          return '♪ 纯音乐，请欣赏 ♪'
+        }
         return '♪ 享受音乐 ♪'
       }
 
-      // 根据当前播放时间找到对应的歌词
-      let lyricIndex = 0
-      for (let i = 0; i < this.currentSong.lyrics.length; i++) {
-        if (this.currentTime >= this.currentSong.lyrics[i].time) {
-          lyricIndex = i
-        } else {
-          break
-        }
+      // 使用二分查找找到当前时间对应的歌词
+      const index = this.binarySearchLyric(this.parsedLyrics, this.currentTime)
+      const lyricItem = this.parsedLyrics[index]
+
+      if (!lyricItem) {
+        return '♪ 享受音乐 ♪'
       }
 
-      return this.currentSong.lyrics[lyricIndex]?.text || '♪ 享受音乐 ♪'
+      // 如果歌词为空（间奏），显示音乐符号
+      let lyric = lyricItem.text || '♪ ♪ ♪'
+
+      // 如果歌词包含"纯音乐"，添加音乐符号装饰
+      if (lyric.includes('纯音乐') || lyric.includes('请欣赏') || lyric.includes('请静心聆听')) {
+        lyric = `♪ ${lyric} ♪`
+      }
+
+      // 调试信息（只在开发环境显示，且每5秒输出一次）
+      if (process.env.NODE_ENV === 'development' &&
+          this.currentTime > 0 &&
+          Math.floor(this.currentTime) % 5 === 0 &&
+          this.currentTime % 1 < 0.1) {
+        console.log(`🎵 当前时间: ${this.currentTime.toFixed(1)}s, 歌词索引: ${index}/${this.parsedLyrics.length}, 歌词: "${lyric}"`)
+      }
+
+      return lyric
     }
   },
   mounted() {
-    // 从本地存储恢复状态
+    // 从本地存储恢复状态，但首次访问时强制播放诀别书
     const savedIndex = localStorage.getItem('currentSongIndex')
     const savedPlaylist = localStorage.getItem('selectedPlaylist')
     const savedTab = localStorage.getItem('activeTab')
     const hasInteracted = localStorage.getItem('musicPlayerInteracted')
+    const isFirstVisit = localStorage.getItem('isFirstVisit')
 
-    if (savedIndex) this.currentIndex = parseInt(savedIndex)
+    // 如果是首次访问，设置为播放诀别书（索引0）
+    if (isFirstVisit !== 'false') {
+      this.currentIndex = 0 // 诀别书在第一位
+      this.isFirstPlay = false
+      localStorage.setItem('isFirstVisit', 'false')
+      console.log('🎵 首次访问，将播放诀别书')
+    } else if (savedIndex) {
+      this.currentIndex = parseInt(savedIndex)
+      this.isFirstPlay = false
+      console.log(`🎵 恢复上次播放: ${this.musicList[this.currentIndex]?.name}`)
+    }
+
     if (savedPlaylist) this.selectedPlaylist = savedPlaylist
     if (savedTab) this.activeTab = savedTab
     if (hasInteracted === 'true') {
@@ -313,6 +328,11 @@ export default {
 
     // 添加用户交互监听器来自动播放
     this.addAutoPlayListener()
+
+    // 如果用户已经交互过，直接开始自动播放
+    if (hasInteracted === 'true') {
+      this.startAutoPlay()
+    }
   },
   methods: {
     toggleMinimize() {
@@ -351,8 +371,15 @@ export default {
       }
     },
     nextSong() {
-      this.currentIndex = this.currentIndex < this.musicList.length - 1 ? this.currentIndex + 1 : 0
+      if (this.isRandomMode && !this.isFirstPlay) {
+        this.playRandomSong()
+      } else {
+        this.currentIndex = this.currentIndex < this.musicList.length - 1 ? this.currentIndex + 1 : 0
+      }
+
+      this.isFirstPlay = false
       this.loadCurrentSong()
+
       if (this.isPlaying) {
         this.$nextTick(() => {
           this.$refs.audioPlayer.play().catch(() => {
@@ -418,6 +445,9 @@ export default {
       const song = this.currentSong
       this.$refs.audioPlayer.src = song.audio_url
       localStorage.setItem('currentSongIndex', this.currentIndex.toString())
+
+      // 加载歌词
+      this.loadLyrics(song.lrcFile)
     },
     showPlaylist() {
       this.showPlaylistModal = this.showPlaylistModal ? false : true
@@ -437,7 +467,13 @@ export default {
     },
     onSongEnd() {
       this.isPlaying = false
-      this.nextSong()
+      // 记录当前歌曲已播放
+      if (!this.playedSongs.includes(this.currentIndex)) {
+        this.playedSongs.push(this.currentIndex)
+      }
+
+      // 自动播放下一首
+      this.autoPlayNext()
     },
     seekTo(event) {
       const progressBar = event.currentTarget
@@ -456,12 +492,8 @@ export default {
       this.showWelcomePrompt = false
       this.hasUserInteracted = true
       localStorage.setItem('musicPlayerInteracted', 'true')
-      // 自动开始播放第一首歌
-      this.$nextTick(() => {
-        this.togglePlay().catch(() => {
-          // 播放失败时静默处理
-        })
-      })
+      // 自动开始播放第一首歌（诀别书）
+      this.startAutoPlay()
     },
     addAutoPlayListener() {
       // 监听用户的第一次交互
@@ -494,6 +526,243 @@ export default {
       document.addEventListener('click', startAutoPlay, { once: true })
       document.addEventListener('keydown', startAutoPlay, { once: true })
       document.addEventListener('touchstart', startAutoPlay, { once: true })
+    },
+
+    // 加载歌词文件
+    async loadLyrics(lrcFileName) {
+      if (!lrcFileName) {
+        console.log('没有歌词文件名，跳过加载')
+        this.parsedLyrics = []
+        return
+      }
+
+      console.log('开始加载歌词文件:', lrcFileName)
+
+      try {
+        // 尝试从public目录加载LRC文件
+        const url = `/lyrics/${lrcFileName}`
+        console.log('请求URL:', url)
+
+        const response = await fetch(url)
+        console.log('响应状态:', response.status, response.statusText)
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+
+        const lrcText = await response.text()
+        console.log('LRC文件加载成功:', lrcFileName)
+        console.log('文件内容长度:', lrcText.length)
+
+        // 检查文件是否为空或只有空白字符
+        if (!lrcText.trim()) {
+          console.warn('LRC文件为空:', lrcFileName)
+          this.parsedLyrics = []
+          return
+        }
+
+        console.log('文件内容预览:', lrcText.substring(0, 300))
+
+        this.parsedLyrics = this.parseLrcText(lrcText)
+        console.log('解析后的歌词数量:', this.parsedLyrics.length)
+
+        if (this.parsedLyrics.length > 0) {
+          console.log('前几行解析结果:', this.parsedLyrics.slice(0, 5))
+        } else {
+          console.warn('没有解析到有效歌词，可能是纯音乐或格式问题')
+        }
+      } catch (error) {
+        console.error('加载LRC文件失败:', error)
+        console.error('请确保LRC文件存在于public/lyrics/目录中')
+        this.parsedLyrics = []
+      }
+    },
+
+    // 解析LRC歌词文本
+    parseLrcText(lrcText) {
+      console.log('开始解析LRC歌词文本')
+      const lines = lrcText.split('\n')
+      const lyrics = []
+      let lineCount = 0
+
+      for (const line of lines) {
+        lineCount++
+        const trimmedLine = line.trim()
+        if (!trimmedLine) continue
+
+        // 更强健的LRC时间标签匹配，支持多种格式
+        // [mm:ss.xx] [mm:ss.xxx] [mm:ss] [mm:ss.x] 等格式
+        const match = trimmedLine.match(/^\[(\d{1,2}):(\d{2})(?:\.(\d{1,3}))?\](.*)$/)
+        if (match) {
+          const minutes = parseInt(match[1])
+          const seconds = parseInt(match[2])
+          let milliseconds = 0
+
+          // 处理毫秒部分，支持1-3位数字
+          if (match[3]) {
+            const msStr = match[3].padEnd(3, '0') // 补齐到3位
+            milliseconds = parseInt(msStr.substring(0, 3)) // 取前3位
+          }
+
+          const text = match[4].trim()
+
+          // 计算时间（秒），毫秒转换为小数
+          const time = minutes * 60 + seconds + milliseconds / 1000
+
+          console.log(`第${lineCount}行: [${minutes}:${seconds}.${milliseconds}] "${text}"`)
+
+          // 过滤掉制作信息，但保留所有实际歌词内容
+          if (text &&
+              !text.includes('作词') &&
+              !text.includes('作曲') &&
+              !text.includes('编曲') &&
+              !text.includes('制作人') &&
+              !text.includes('录音') &&
+              !text.includes('混音') &&
+              !text.includes('母带') &&
+              !text.includes('封面设计') &&
+              !text.includes('吉他') &&
+              !text.includes('贝斯') &&
+              !text.includes('鼓') &&
+              !text.includes('键盘') &&
+              !text.includes('电吉他') &&
+              !text.includes('钢琴') &&
+              !text.includes('打击乐') &&
+              !text.includes('Organ') &&
+              !text.includes('口琴') &&
+              !text.includes('和声') &&
+              !text.includes('录音师') &&
+              !text.includes('混音师') &&
+              !text.includes('录音室') &&
+              !text.includes('录音助理') &&
+              !text.includes('母带工程') &&
+              !text.includes('工程师') &&
+              !text.includes('Sterling Sound') &&
+              !text.includes('Randy Merrill')) {
+
+            lyrics.push({ time, text })
+            console.log(`✓ 添加歌词: ${time.toFixed(3)}s - "${text}"`)
+          } else if (text) {
+            console.log(`✗ 跳过制作信息: "${text}"`)
+          } else {
+            // 空歌词行，可能是间奏
+            lyrics.push({ time, text: '' })
+            console.log(`✓ 添加空行: ${time.toFixed(3)}s`)
+          }
+        } else {
+          // 尝试匹配其他可能的格式，如带有负数或其他特殊字符的时间标签
+          const altMatch = trimmedLine.match(/^\[(\d{1,2}):(\d{2})(?:\.(\d{1,3}))?.*?\](.*)$/)
+          if (altMatch) {
+            console.log(`✗ 发现格式异常的时间标签，跳过第${lineCount}行: "${trimmedLine}"`)
+          } else {
+            console.log(`✗ 无法解析第${lineCount}行: "${trimmedLine}"`)
+          }
+        }
+      }
+
+      // 按时间排序
+      lyrics.sort((a, b) => a.time - b.time)
+
+      console.log(`解析完成！总共${lineCount}行，有效歌词${lyrics.length}行`)
+      console.log('前5行歌词:', lyrics.slice(0, 5))
+
+      return lyrics
+    },
+
+    // 二分查找歌词
+    binarySearchLyric(lyrics, currentTime) {
+      let left = 0
+      let right = lyrics.length - 1
+      let result = 0
+
+      while (left <= right) {
+        const mid = Math.floor((left + right) / 2)
+        if (lyrics[mid].time <= currentTime) {
+          result = mid
+          left = mid + 1
+        } else {
+          right = mid - 1
+        }
+      }
+
+      return result
+    },
+
+    // 随机播放歌曲
+    playRandomSong() {
+      // 如果所有歌曲都播放过了，重置播放记录（除了当前歌曲）
+      if (this.playedSongs.length >= this.musicList.length - 1) {
+        this.playedSongs = [this.currentIndex]
+      }
+
+      // 获取未播放的歌曲列表
+      const unplayedSongs = []
+      for (let i = 0; i < this.musicList.length; i++) {
+        if (!this.playedSongs.includes(i)) {
+          unplayedSongs.push(i)
+        }
+      }
+
+      // 如果有未播放的歌曲，随机选择一首
+      if (unplayedSongs.length > 0) {
+        const randomIndex = Math.floor(Math.random() * unplayedSongs.length)
+        this.currentIndex = unplayedSongs[randomIndex]
+      } else {
+        // 如果没有未播放的歌曲，随机选择一首（排除当前歌曲）
+        let newIndex
+        do {
+          newIndex = Math.floor(Math.random() * this.musicList.length)
+        } while (newIndex === this.currentIndex && this.musicList.length > 1)
+        this.currentIndex = newIndex
+      }
+
+      console.log(`🎵 随机播放: ${this.musicList[this.currentIndex].name}`)
+    },
+
+    // 自动播放下一首
+    autoPlayNext() {
+      console.log('🎵 歌曲播放完毕，自动播放下一首')
+      this.nextSong()
+
+      // 延迟一点时间后自动开始播放
+      this.$nextTick(() => {
+        setTimeout(() => {
+          this.togglePlay().catch(() => {
+            console.log('自动播放失败')
+          })
+        }, 500)
+      })
+    },
+
+    // 开始自动播放
+    startAutoPlay() {
+      console.log('🎵 开始自动播放')
+      this.$nextTick(() => {
+        setTimeout(() => {
+          this.togglePlay().catch(() => {
+            console.log('自动播放失败，等待用户交互')
+          })
+        }, 300)
+      })
+    },
+
+    // 切换随机播放模式
+    toggleRandomMode() {
+      this.isRandomMode = !this.isRandomMode
+      console.log(`🎵 随机播放模式: ${this.isRandomMode ? '开启' : '关闭'}`)
+
+      // 重置播放记录
+      if (this.isRandomMode) {
+        this.playedSongs = [this.currentIndex]
+      }
+    },
+
+    // 重置播放器状态（用于测试）
+    resetPlayerState() {
+      localStorage.removeItem('isFirstVisit')
+      localStorage.removeItem('currentSongIndex')
+      localStorage.removeItem('musicPlayerInteracted')
+      console.log('🎵 播放器状态已重置，刷新页面将重新开始')
     }
   }
 }
@@ -799,13 +1068,40 @@ export default {
   background: #A0522D;
 }
 
+.random-btn {
+  position: relative;
+}
+
+.random-btn.active {
+  background: rgba(139, 69, 19, 0.2);
+  color: #8B4513;
+}
+
+.random-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #8B4513;
+}
+
+.random-icon {
+  font-size: 16px;
+  display: inline-block;
+}
+
 /* 歌曲信息卡片 */
 .player-info {
   position: absolute;
   top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 90%;
+  right: 0; /* 改为靠右对齐 */
+  width: 320px; /* 固定宽度，确保一致性 */
+  min-width: 320px; /* 最小宽度 */
+  max-width: 320px; /* 最大宽度 */
   padding: 15px;
   background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(10px);
@@ -814,16 +1110,18 @@ export default {
   z-index: 1;
   opacity: 0;
   transition: all 0.5s ease;
+  box-sizing: border-box; /* 确保padding包含在宽度内 */
 }
 
 .player-info.show {
-  top: -110px;
+  top: -130px;
   opacity: 1;
   z-index: 1;
 }
 
 .info {
   text-align: right;
+  width: 100%; /* 确保内容区域占满整个卡片 */
 }
 
 .name {
@@ -831,16 +1129,26 @@ export default {
   font-weight: bold;
   color: #333;
   margin-bottom: 4px;
+  white-space: nowrap; /* 防止换行 */
+  overflow: hidden; /* 隐藏溢出 */
+  text-overflow: ellipsis; /* 显示省略号 */
 }
 
 .singer-album {
   font-size: 12px;
   color: #666;
   margin-bottom: 8px;
+  white-space: nowrap; /* 防止换行 */
+  overflow: hidden; /* 隐藏溢出 */
+  text-overflow: ellipsis; /* 显示省略号 */
 }
 
 .lyrics-container {
   margin-top: 8px;
+  height: 40px; /* 固定歌词容器高度 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .current-lyric {
@@ -850,8 +1158,16 @@ export default {
   font-style: italic;
   line-height: 1.4;
   min-height: 18px;
+  max-height: 36px; /* 限制最大高度，最多两行 */
   transition: all 0.3s ease;
   opacity: 0.9;
+  overflow: hidden; /* 隐藏溢出的文字 */
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* 最多显示两行 */
+  line-clamp: 2; /* 标准属性，用于兼容性 */
+  -webkit-box-orient: vertical;
+  word-break: break-word; /* 允许单词内换行 */
+  width: 100%; /* 占满容器宽度 */
 }
 
 .music_progress {

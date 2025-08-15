@@ -58,30 +58,30 @@ export default {
       slides: [
         {
           id: 1,
-          title: '探索自然之美',
-          description: '发现世界各地的壮丽风景',
-          image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&w=800&q=80',
+          title: '山水如画',
+          description: '青山绿水，诗意江南',
+          image: 'https://images.unsplash.com/photo-1547036967-23d11aacaee0?ixlib=rb-4.0.3&w=1200&q=80',
           link: '/recommendations'
         },
         {
           id: 2,
-          title: '音乐的力量',
-          description: '聆听来自世界的美妙旋律',
-          image: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?ixlib=rb-4.0.3&w=800&q=80',
+          title: '古韵悠长',
+          description: '千年古刹，梵音袅袅',
+          image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&w=1200&q=80',
           link: '/recommendations'
         },
         {
           id: 3,
-          title: '科技前沿',
-          description: '探索最新的技术趋势和工具',
-          image: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?ixlib=rb-4.0.3&w=800&q=80',
+          title: '竹林深处',
+          description: '翠竹摇曳，清风徐来',
+          image: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&w=1200&q=80',
           link: '/recommendations'
         },
         {
           id: 4,
-          title: '文化艺术',
-          description: '感受不同文化的艺术魅力',
-          image: 'https://images.unsplash.com/photo-1541961017774-22349e4a1262?ixlib=rb-4.0.3&w=800&q=80',
+          title: '湖光山色',
+          description: '碧波荡漾，远山如黛',
+          image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&w=1200&q=80',
           link: '/blog'
         }
       ]
@@ -132,10 +132,12 @@ export default {
 .carousel-container {
   position: relative;
   width: 100%;
-  height: 300px;
-  border-radius: 15px;
+  height: 350px;
+  border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 12px 35px rgba(139, 69, 19, 0.2);
+  border: 2px solid rgba(205, 133, 63, 0.3);
+  background: linear-gradient(45deg, rgba(139, 69, 19, 0.05), rgba(205, 133, 63, 0.05));
 }
 
 .carousel-wrapper {
@@ -152,12 +154,26 @@ export default {
   width: 100%;
   height: 100%;
   opacity: 0;
-  transition: opacity 0.5s ease-in-out;
+  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
+  transform: scale(1.05);
 }
 
 .carousel-slide.active {
   opacity: 1;
+  transform: scale(1);
+}
+
+.carousel-slide::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, rgba(139, 69, 19, 0.1), rgba(205, 133, 63, 0.1));
+  z-index: 1;
+  pointer-events: none;
 }
 
 .slide-content {
@@ -177,23 +193,32 @@ export default {
   bottom: 0;
   left: 0;
   right: 0;
-  background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+  background: linear-gradient(transparent, rgba(139, 69, 19, 0.9), rgba(0, 0, 0, 0.8));
   color: white;
-  padding: 2rem;
+  padding: 2.5rem;
   text-align: left;
+  z-index: 2;
+  backdrop-filter: blur(2px);
 }
 
 .slide-title {
-  font-size: 1.5rem;
-  font-weight: bold;
-  margin-bottom: 0.5rem;
-  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-bottom: 0.8rem;
+  text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.7);
+  font-family: 'STKaiti', '楷体', serif;
+  letter-spacing: 2px;
+  color: #F5F5DC;
 }
 
 .slide-description {
-  font-size: 1rem;
-  margin-bottom: 1rem;
-  opacity: 0.9;
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
+  opacity: 0.95;
+  font-family: 'STKaiti', '楷体', serif;
+  letter-spacing: 1px;
+  line-height: 1.6;
+  color: #F5F5DC;
 }
 
 .carousel-indicators {
@@ -206,39 +231,48 @@ export default {
 }
 
 .indicator {
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.5);
+  background: rgba(205, 133, 63, 0.6);
+  border: 2px solid rgba(139, 69, 19, 0.4);
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(2px);
 }
 
 .indicator.active {
-  background: white;
-  transform: scale(1.2);
+  background: rgba(139, 69, 19, 0.9);
+  border-color: rgba(205, 133, 63, 0.8);
+  transform: scale(1.3);
+  box-shadow: 0 2px 8px rgba(139, 69, 19, 0.4);
 }
 
 .carousel-btn {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(255, 255, 255, 0.9);
-  border: none;
+  background: rgba(139, 69, 19, 0.8);
+  border: 2px solid rgba(205, 133, 63, 0.6);
   border-radius: 50%;
-  width: 40px;
-  height: 40px;
+  width: 45px;
+  height: 45px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 10;
+  color: #F5F5DC;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 4px 15px rgba(139, 69, 19, 0.3);
 }
 
 .carousel-btn:hover {
-  background: white;
-  transform: translateY(-50%) scale(1.1);
+  background: rgba(205, 133, 63, 0.9);
+  border-color: rgba(139, 69, 19, 0.8);
+  transform: translateY(-50%) scale(1.15);
+  box-shadow: 0 6px 20px rgba(139, 69, 19, 0.4);
 }
 
 .carousel-btn.prev {

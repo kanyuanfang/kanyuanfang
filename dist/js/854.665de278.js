@@ -1,2 +1,0 @@
-"use strict";(self["webpackChunkqinglan_share_website"]=self["webpackChunkqinglan_share_website"]||[]).push([[854],{9854:function(n,e,a){a.r(e),a.d(e,{default:function(){return d}});var r=a(6768);const s={class:"world-map"};function t(n,e,a,t,u,l){return(0,r.uX)(),(0,r.CE)("div",s,e[0]||(e[0]=[(0,r.Lk)("h1",null,"世界地图",-1),(0,r.Lk)("p",null,"世界地图功能正在开发中...",-1)]))}var u={name:"WorldMapPage"},l=a(1241);const c=(0,l.A)(u,[["render",t],["__scopeId","data-v-22945dca"]]);var d=c}}]);
-//# sourceMappingURL=854.665de278.js.map
